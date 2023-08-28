@@ -1,0 +1,15 @@
+.date-filter,
+.search-filter {
+  display: inline-block;
+}
+
+.date-filter label,
+.search-filter label,
+.search-filter input {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.search-filter input {
+  width: 500px;
+}

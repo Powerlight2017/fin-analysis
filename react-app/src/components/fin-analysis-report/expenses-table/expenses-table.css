@@ -1,0 +1,19 @@
+.expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.expenses-table th,
+.expenses-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.expenses-table th {
+  background-color: #f2f2f2;
+}
+
+.btn-add {
+  margin-bottom: 10px;
+}

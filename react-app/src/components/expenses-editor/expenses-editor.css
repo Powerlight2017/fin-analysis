@@ -1,0 +1,9 @@
+.expense-container {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+.expenses-table button {
+  margin-right: 10px;
+}
