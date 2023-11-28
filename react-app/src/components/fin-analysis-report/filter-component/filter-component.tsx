@@ -111,7 +111,7 @@ const FilterComponent: React.FC<IFilterProperties> = (
           />
         </div>
 
-        <button className="btn-search" onClick={handleSearchClick}>
+        <button data-testId="button-search" className="btn-search" onClick={handleSearchClick}>
           Search
         </button>
         <button onClick={handleFilterReset}>Reset</button>

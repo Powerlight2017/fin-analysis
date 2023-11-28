@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import './login.css'; // Import styles.
-import apiClient from '../../services/apiClient';
 import RegistrationComponent from '../registration/registration';
-import authService from '../../services/authService';
-import { setUser, setIsLoggedIn } from '../../redux/features/user/userSlice';
 import { useAppDispatch } from '../../redux/hooks';
-import toast from 'react-hot-toast';
 import { handleLoginClick } from '../../handlers/authHandlers';
 
 const LoginComponent: React.FC = () => {

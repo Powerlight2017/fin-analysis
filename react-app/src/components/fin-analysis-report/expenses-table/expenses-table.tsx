@@ -19,6 +19,7 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({
   expensesDataType,
 }) => {
   const dispatch = useAppDispatch();
+
   const expenses = useAppSelector((state: RootState) =>
     expensesDataType == 'main'
       ? state.expenses.expenses
@@ -52,7 +53,9 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({
   };
 
   const handleDelete = (id: number) => {
-    dispatch(deleteExpense(id));
+    if (window.confirm("Are you sure to delete this expense?")){
+      dispatch(deleteExpense(id));
+    }
   };
 
   const handleSave = (editedExpense: ExpenseStateDto) => {

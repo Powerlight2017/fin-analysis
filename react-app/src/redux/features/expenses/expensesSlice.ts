@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import ExpensesService, { Expense } from '../../../services/expensesService';
 import { expenseToStateDto } from '../../../services/utils';
 

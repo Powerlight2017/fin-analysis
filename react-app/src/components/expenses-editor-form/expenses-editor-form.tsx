@@ -48,29 +48,29 @@ const ExpenseEditorForm: React.FC<ExpenseFormProps> = ({
   return (
     <form onSubmit={handleSubmit(onSubmitHandler)}>
       <div className="form-group">
-        <label>Description:</label>
+        <label htmlFor='description'>Description:</label>
         <Controller
           name="description"
           control={control}
           rules={{ required: 'This field is required' }}
-          render={({ field }) => <input {...field} />}
+          render={({ field }) => <input {...field} id="description" />}
         />
         {errors.description && <p>{errors.description.message}</p>}
       </div>
 
       <div className="form-group limited-length-field">
-        <label>Sum:</label>
+        <label htmlFor='sum'>Sum:</label>
         <Controller
           name="sum"
           control={control}
           rules={{ required: 'This field is required' }}
-          render={({ field }) => <input {...field} type="number" />}
+          render={({ field }) => <input {...field} id='sum' type="number" />}
         />
         {errors.sum && <p>{errors.sum.message}</p>}
       </div>
 
       <div className="form-group limited-length-field">
-        <label>Date:</label>
+        <label htmlFor='date'>Date:</label>
         <Controller
           name="date"
           control={control}
@@ -78,6 +78,7 @@ const ExpenseEditorForm: React.FC<ExpenseFormProps> = ({
           render={({ field }) => (
             <input
               {...field}
+              id='date'
               type="date"
               value={dateStr}
               onChange={(e) => changeDate(e)}
