@@ -13,3 +13,7 @@
 .search-filter input {
   width: 500px;
 }
+
+button.btn-search {
+  margin-right: 5px;
+}

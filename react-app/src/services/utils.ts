@@ -1,3 +1,8 @@
+import { ExpenseStateDto } from '../redux/features/expenses/expensesSlice';
+import {
+  PageFilter,
+  PageFilterDto,
+} from '../redux/features/filter/filterSlice';
 import {
   AverageExpenseInfo,
   AverageTotalsInfo,
@@ -10,6 +15,24 @@ export function formatDate(date: Date): string {
     '0',
   )}-${String(date.getDate()).padStart(2, '0')}`;
 }
+
+export const expenseToStateDto = (expense: Expense): ExpenseStateDto => {
+  return {
+    sum: expense.sum,
+    description: expense.description,
+    date: expense.date.toISOString().split('T')[0],
+    id: expense.id,
+  };
+};
+
+export const expenseStateDtoToExpense = (expense: ExpenseStateDto): Expense => {
+  return {
+    sum: expense.sum,
+    description: expense.description,
+    date: new Date(expense.date),
+    id: expense.id,
+  };
+};
 
 export function getStartDate(): Date {
   const currentDate = new Date();
@@ -37,6 +60,14 @@ export function getEndDate(): Date {
   return nextMonthStart;
 }
 
+export function getStartDateString(): string {
+  return getStartDate().toISOString().split('T')[0];
+}
+
+export function getEndDateString(): string {
+  return getEndDate().toISOString().split('T')[0];
+}
+
 export function getDatesRange(start: Date, end: Date): Date[] {
   const dates = [];
   let currentDate = new Date(start); // create a copy of start date
@@ -50,7 +81,7 @@ export function getDatesRange(start: Date, end: Date): Date[] {
 }
 
 export function cumulativeAverageExpense(
-  data: Expense[],
+  data: ExpenseStateDto[],
   startDate: Date,
   endDate: Date,
 ): AverageExpenseInfo[] {
@@ -62,7 +93,7 @@ export function cumulativeAverageExpense(
   const averagedData = dates.map((date) => {
     // Calculating expenses for specific date.
     const expensesOnDate = data
-      .filter((entry) => entry.date.getTime() == date.getTime())
+      .filter((entry) => new Date(entry.date).getTime() == date.getTime())
       .reduce((sum, entry) => sum + entry.sum, 0);
 
     totalExpense += expensesOnDate;
@@ -97,6 +128,14 @@ export function calculateAverageExpenseForActualDays(
   }
 
   return totalSum / daysWithDataCount;
+}
+
+export function convertFilterStateToDto(filter: PageFilter): PageFilterDto {
+  return {
+    startDate: new Date(filter.startDate),
+    endDate: new Date(filter.endDate),
+    searchTerm: filter.searchTerm,
+  };
 }
 
 export function cumulativeAverageExpenseForMonth(

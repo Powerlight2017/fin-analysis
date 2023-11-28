@@ -2,6 +2,7 @@ import {
   calculateAverageExpenseForActualDays,
   cumulativeAverageExpense,
   cumulativeAverageExpenseForMonth,
+  expenseToStateDto,
   formatDate,
   getDatesRange,
 } from './utils';
@@ -35,7 +36,11 @@ describe('Expense utils', () => {
     ];
     const startDate = new Date('2023-01-01');
     const endDate = new Date('2023-01-02');
-    const result = cumulativeAverageExpense(expenses, startDate, endDate);
+    const result = cumulativeAverageExpense(
+      expenses.map(expenseToStateDto),
+      startDate,
+      endDate,
+    );
     expect(result.length).toBe(2);
     expect(result[0].expense).toBe(100);
     expect(result[1].expense).toBe(150);

@@ -1,96 +1,77 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import ExpensesService, { Expense } from '../../services/expensesService';
-import { getEndDate, getStartDate } from '../../services/utils';
-import FilterComponent from '../fin-analysis-report/filter-component/filter-component';
+import React, { useEffect } from 'react';
+import { RootState } from '../../redux/store';
+import {
+  fetchExpenses,
+  deleteExpense,
+  addExpense,
+  editExpense,
+  ExpenseStateDto,
+} from '../../redux/features/expenses/expensesSlice';
 import ExpensesTable from '../fin-analysis-report/expenses-table/expenses-table';
 import ExpenseEditorForm from '../expenses-editor-form/expenses-editor-form';
 import './expenses-editor.css';
-import expensesService from '../../services/expensesService';
+import FilterComponent from '../fin-analysis-report/filter-component/filter-component';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import {
+  convertFilterStateToDto,
+  expenseStateDtoToExpense,
+} from '../../services/utils';
 
-const PAGE_SIZE = 10;
+const ExpenseEditor: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector(
+    (state: RootState) => state.expenses,
+  );
+  const [editingExpense, setEditingExpense] =
+    React.useState<ExpenseStateDto | null>(null);
 
-export const ExpenseEditor: React.FC = () => {
-  const [expensesData, setExpensesData] = useState<Expense[]>();
-  const [currentPage, setCurrentPage] = useState(1);
-  const initialStartDate = useMemo(() => getStartDate(), []);
-  const initialEndDate = useMemo(() => getEndDate(), []);
-  const [triggerReload, setTriggerReload] = useState<boolean>(false);
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const filterName = 'editor';
 
-  const [startDate, setStartDate] = useState(initialStartDate);
-  const [endDate, setEndDate] = useState(initialEndDate);
+  const filtersState = useAppSelector((state) => state.filters);
+  let filter = filtersState.filters[filterName];
+  const { initialStartDate, initialEndDate } = useAppSelector(
+    (state: RootState) => state.filters,
+  );
 
-  const [FilterString, setFilterString] = useState<string>('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await ExpensesService.getExpenses(
-          startDate,
-          endDate,
-          FilterString,
-        );
-        setExpensesData(data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+  if (!filter) {
+    filter = {
+      startDate: initialStartDate,
+      endDate: initialEndDate,
+      searchTerm: '',
     };
-
-    fetchData();
-  }, [startDate, endDate, FilterString, triggerReload]);
-
-  function onFilterChange(filters: {
-    startDate: Date;
-    endDate: Date;
-    searchTerm: string;
-  }): void {
-    setStartDate(filters.startDate);
-    setEndDate(filters.endDate);
-    setFilterString(filters.searchTerm);
   }
 
-  const handleEdit = (id: number) => {
-    const expenseToEdit = expensesData?.find((e) => e.id === id) || null;
-    setEditingExpense(expenseToEdit);
-  };
+  useEffect(() => {
+    dispatch(
+      fetchExpenses({
+        pageFilter: convertFilterStateToDto(filter),
+        target: 'editor',
+      }),
+    );
+  }, [dispatch]);
 
-  const handleAdd = () => {
-    const expenseToEdit = {} as Expense;
-    setEditingExpense(expenseToEdit);
-  };
-
-  const handleDelete = (id: number) => {
-    expensesService
-      .deleteExpense(id)
-      .catch((result) => {
-        // showError
-      })
-      .finally(() => {
-        setEditingExpense(null);
-        setTriggerReload(!triggerReload);
-      });
-  };
-
-  const handleSave = (editedExpense: Expense) => {
-    expensesService
-      .editExpense(editedExpense.id, editedExpense)
-      .catch((result) => {
-        // showError
-      })
-      .finally(() => {
-        setEditingExpense(null);
-        setTriggerReload(!triggerReload);
-      });
+  const handleSave = (expense: ExpenseStateDto) => {
+    if (editingExpense && editingExpense.id) {
+      dispatch(editExpense(expenseStateDtoToExpense(expense)));
+    } else {
+      dispatch(addExpense(expenseStateDtoToExpense(expense)));
+    }
+    setEditingExpense(null);
   };
 
   const handleBack = () => {
     setEditingExpense(null);
   };
 
-  return (
-    <div>
-      <h2>Expense Editor</h2>
+  const handleAddNewExpense = () => {
+    setEditingExpense({ id: 0, description: '', sum: 0, date: '' });
+  };
 
+  return (
+    <div className="expense-editor">
+      <h2>Expense Editor</h2>
+      {loading && <p>Loading...</p>}
+      {error && <p>Error: {error}</p>}
       {editingExpense ? (
         <ExpenseEditorForm
           initialData={editingExpense}
@@ -99,36 +80,15 @@ export const ExpenseEditor: React.FC = () => {
         />
       ) : (
         <>
-          <FilterComponent
-            startDate={startDate}
-            endDate={endDate}
-            onFilterChange={onFilterChange}
-          />
-          <hr></hr>
-          {expensesData && expensesData.length > 0 ? (
-            <>
-              <ExpensesTable
-                expenses={expensesData!}
-                editEnabled={true}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onAdd={handleAdd}
-              />
-            </>
-          ) : (
-            <>
-              <div>
-                {
-                  <button className="btn-add" onClick={handleAdd}>
-                    Add
-                  </button>
-                }
-              </div>
-              <div>No data.</div>
-            </>
-          )}
+          <FilterComponent filterName={filterName} />
+          <button className="add-expense-button" onClick={handleAddNewExpense}>
+            Add New Expense
+          </button>
+          <ExpensesTable editEnabled={true} expensesDataType={filterName} />
         </>
       )}
     </div>
   );
 };
+
+export default ExpenseEditor;

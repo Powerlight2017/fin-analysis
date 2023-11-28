@@ -2,18 +2,16 @@ import React from 'react';
 import { Navbar, Nav, NavDropdown, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './nav-bar.css';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { AppDispatch, RootState } from '../../redux/store';
+import { handleLogout } from '../../handlers/authHandlers';
 
-interface NavBarProps {
-  isLoggedIn: boolean;
-  handleLogin: () => void;
-  handleLogout: () => void;
-}
+const NavBar: React.FC = () => {
+  const isLoggedIn = useAppSelector(
+    (state: RootState) => state.user.isLoggedIn,
+  );
+  const dispatch: AppDispatch = useAppDispatch();
 
-const NavBar: React.FC<NavBarProps> = ({
-  isLoggedIn,
-  handleLogin,
-  handleLogout,
-}) => {
   return (
     <Navbar bg="light" expand="lg" className="nav-container">
       <Navbar.Brand as={Link} to="/">
@@ -39,14 +37,15 @@ const NavBar: React.FC<NavBarProps> = ({
           {isLoggedIn ? (
             <>
               <span>Welcome!</span>
-              <Button variant="outline-danger" onClick={handleLogout}>
+              <Button
+                variant="outline-danger"
+                onClick={() => handleLogout(dispatch)}
+              >
                 Logout
               </Button>
             </>
           ) : (
-            <Button variant="outline-success" onClick={handleLogin}>
-              Login
-            </Button>
+            <></>
           )}
         </div>
       </Navbar.Collapse>

@@ -1,32 +1,26 @@
 import React from 'react';
-import { render } from 'react-dom';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import {
-  cumulativeAverageExpense,
-  formatDate,
-  getDatesRange,
-} from '../../services/utils';
-import { Expense } from '../../services/expensesService';
-
-interface ChartEntry {
-  date: Date;
-  expense: number;
-}
+import { cumulativeAverageExpense, formatDate } from '../../services/utils';
+import { ExpenseStateDto } from '../../redux/features/expenses/expensesSlice';
 
 interface ChartProps {
-  data: Expense[];
+  data: ExpenseStateDto[];
 }
 
 const Chart: React.FC<ChartProps> = ({ data }) => {
   const sortedData = data
     .slice()
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const startDate = sortedData[0].date;
   const endDate = sortedData[sortedData.length - 1].date;
 
-  const dates = cumulativeAverageExpense(data, startDate, endDate);
+  const dates = cumulativeAverageExpense(
+    data,
+    new Date(startDate),
+    new Date(endDate),
+  );
 
   const uniqueDays = Array.from(
     new Set(dates.map((entry) => formatDate(entry.date))),

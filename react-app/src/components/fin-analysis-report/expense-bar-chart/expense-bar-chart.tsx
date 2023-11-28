@@ -1,24 +1,24 @@
 import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Expense } from '../../../services/expensesService';
 import { formatDate } from '../../../services/utils';
+import { ExpenseStateDto } from '../../../redux/features/expenses/expensesSlice';
 
 interface ExpenseBarChartProps {
-  data: Expense[];
+  data: ExpenseStateDto[];
 }
 
 const ExpenseBarChart: React.FC<ExpenseBarChartProps> = ({ data }) => {
   // Get unique dates.
   const uniqueDays = Array.from(
-    new Set(data.map((entry) => formatDate(entry.date))),
+    new Set(data.map((entry) => formatDate(new Date(entry.date)))),
   );
 
   // Calculating expenses for specific day.
   const expensesPerDay: { [key: string]: number } = {};
 
   data.forEach((entry) => {
-    const day = formatDate(entry.date);
+    const day = formatDate(new Date(entry.date));
     expensesPerDay[day] = (expensesPerDay[day] || 0) + entry.sum;
   });
 

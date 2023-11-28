@@ -1,33 +1,37 @@
 import React, { useState } from 'react';
+import { RootState } from '../../../redux/store';
 import './expenses-table.css';
-
-interface Expense {
-  sum: number;
-  description: string;
-  date: Date;
-  id: number;
-}
+import {
+  editExpense,
+  deleteExpense,
+  ExpenseStateDto,
+} from '../../../redux/features/expenses/expensesSlice';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
+import ExpenseEditorForm from '../../expenses-editor-form/expenses-editor-form';
+import { expenseStateDtoToExpense } from '../../../services/utils';
 
 interface ExpensesTableProps {
-  expenses: Expense[];
   editEnabled: boolean;
-  onEdit?: (id: number) => void;
-  onDelete?: (id: number) => void;
-  onAdd?: () => void;
+  expensesDataType: 'editor' | 'main';
 }
-
 const ExpensesTable: React.FC<ExpensesTableProps> = ({
-  expenses,
   editEnabled,
-  onEdit,
-  onDelete,
-  onAdd,
+  expensesDataType,
 }) => {
+  const dispatch = useAppDispatch();
+  const expenses = useAppSelector((state: RootState) =>
+    expensesDataType == 'main'
+      ? state.expenses.expenses
+      : state.expenses.editorExpenses,
+  ); 
+  const [editingExpense, setEditingExpense] = useState<ExpenseStateDto | null>(
+    null,
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10); // 10 items per page.
+  const itemsPerPage = 10; // 10 items per page.
 
   const totalItems = expenses.length;
-
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handlePreviousClick = () => {
@@ -43,6 +47,23 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({
     currentPage * itemsPerPage,
   );
 
+  const handleEdit = (expense: ExpenseStateDto | null) => {
+    setEditingExpense(expense);
+  };
+
+  const handleDelete = (id: number) => {
+    dispatch(deleteExpense(id));
+  };
+
+  const handleSave = (editedExpense: ExpenseStateDto) => {
+    dispatch(editExpense(expenseStateDtoToExpense(editedExpense)));
+    setEditingExpense(null);
+  };
+
+  const handleBack = () => {
+    setEditingExpense(null);
+  };
+
   function formatDate(date: Date): string {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
       2,
@@ -50,51 +71,118 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({
     )}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
-  return (
+  // Estimage columns length.
+  const gridTemplateColumns = calculateColumnStyle();
+
+  const renderNoData = (
     <>
-      {editEnabled && (
-        <button className="btn-add" onClick={onAdd}>
-          Add
-        </button>
-      )}
-      <table className="expenses-table table table-bordered table-striped table-responsive table-hover">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Sum</th>
-            {editEnabled && <th>Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {displayedExpenses.map((expense: Expense, index: number) => (
-            <tr key={index}>
-              <td>{formatDate(expense.date)}</td>
-              <td>{expense.description}</td>
-              <td>{expense.sum}</td>
-              {editEnabled && (
-                <td>
-                  <button onClick={() => onEdit?.(expense.id)}>Edit</button>
-                  <button onClick={() => onDelete?.(expense.id)}>Delete</button>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="pagination">
-        <button onClick={handlePreviousClick} disabled={currentPage === 1}>
-          Back
-        </button>
-        <span>
-          Pages {currentPage} / {totalPages}
-        </span>
-        <button onClick={handleNextClick} disabled={currentPage === totalPages}>
-          Forward
-        </button>
-      </div>
+      <div className="no-data"> No data. </div>
     </>
   );
+
+  if (displayedExpenses.length == 0) {
+    return renderNoData;
+  } else
+    return (
+      <>
+        {editingExpense ? (
+          <ExpenseEditorForm
+            initialData={editingExpense}
+            onSubmit={handleSave}
+            handleBack={handleBack}
+          />
+        ) : (
+          <>
+            <div className="expenses-grid" style={{ gridTemplateColumns }}>
+              <div className="grid-header">Date</div>
+              <div className="grid-header">Description</div>
+              <div className="grid-header">Sum</div>
+              {editEnabled && <div className="grid-header">Actions</div>}
+
+              {displayedExpenses.map((expense, index) => (
+                <React.Fragment key={index}>
+                  <div
+                    className={
+                      index % 2 === 0
+                        ? 'grid-item even-row'
+                        : 'grid-item odd-row'
+                    }
+                  >
+                    {formatDate(new Date(expense.date))}
+                  </div>
+                  <div
+                    className={
+                      index % 2 === 0
+                        ? 'grid-item even-row'
+                        : 'grid-item odd-row'
+                    }
+                  >
+                    {expense.description}
+                  </div>
+                  <div
+                    className={
+                      index % 2 === 0
+                        ? 'grid-item even-row'
+                        : 'grid-item odd-row'
+                    }
+                  >
+                    {expense.sum}
+                  </div>
+
+                  {editEnabled && (
+                    <div className="action-cell">
+                      <button
+                        className="edit-button"
+                        onClick={() => handleEdit(expense)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDelete(expense.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {displayedExpenses.length > itemsPerPage ? (
+              <div className="pagination-area">
+                <button
+                  onClick={handlePreviousClick}
+                  disabled={currentPage === 1}
+                >
+                  Back
+                </button>
+                Page {currentPage} of {totalPages}
+                <button
+                  onClick={handleNextClick}
+                  disabled={currentPage === totalPages}
+                >
+                  Forward
+                </button>
+              </div>
+            ) : (
+              ''
+            )}
+          </>
+        )}
+      </>
+    );
+
+  function calculateColumnStyle() {
+    const dateColumnWidth = '120px'; 
+    const sumColumnWidth = '100px'; 
+    const descriptionColumnWidth = '1fr'; 
+    const actionColumnWidth = editEnabled ? 'auto' : '';
+
+    // Generate style for grid-template-columns
+    const gridTemplateColumns = `${dateColumnWidth} ${descriptionColumnWidth} ${sumColumnWidth} ${actionColumnWidth}`;
+    return gridTemplateColumns;
+  }
 };
 
 export default ExpensesTable;

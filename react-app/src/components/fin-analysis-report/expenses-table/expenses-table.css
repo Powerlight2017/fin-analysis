@@ -1,19 +1,51 @@
-.expenses-table {
-  width: 100%;
-  border-collapse: collapse;
+.expenses-grid {
+  display: grid;
+  gap: 10px;
+  border: 1px solid black;
+  gap: 0px;
+  background-color: #ddd;
+  border: solid 1px black;
 }
 
-.expenses-table th,
-.expenses-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
+.grid-item.even-row {
+  background-color: #ffffff; /* white background for even rows. */
 }
 
-.expenses-table th {
-  background-color: #f2f2f2;
+.grid-item.odd-row {
+  background-color: #f9f9f9; /* background for odd rows. */
+}
+
+.grid-header {
+  font-weight: bold;
 }
 
 .btn-add {
   margin-bottom: 10px;
+}
+
+.button.button-back,
+.edit-button,
+.delete-button {
+  margin-right: 10px;
+}
+
+.grid-header,
+.expenses-grid > div {
+  padding: 10px;
+  border: solid 1px black;
+}
+
+.action-cell {
+  background-color: #ffffff;
+  border: solid 1px black;
+}
+
+.pagination-area {
+  display: block;
+  margin-top: 10px;
+}
+
+.pagination-area button {
+  margin-right: 5px;
+  margin-left: 5px;
 }

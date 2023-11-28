@@ -10,6 +10,7 @@ export interface Expense {
 export interface ExpensesEditResponse {
   message: string;
   success: boolean;
+  data: Expense;
 }
 
 export interface AverageExpenseInfo {
@@ -47,10 +48,7 @@ class ExpensesService {
       return Promise.reject('Error fetching expenses:' + error);
     }
   }
-  async editExpense(
-    id: number,
-    expense: Expense,
-  ): Promise<ExpensesEditResponse> {
+  async editExpense(expense: Expense): Promise<ExpensesEditResponse> {
     try {
       const response = await apiClient.put<ExpensesEditResponse>(
         `/api/Expenses`,
@@ -60,6 +58,19 @@ class ExpensesService {
     } catch (error) {
       console.error('Error editing expenses:', error);
       return Promise.reject('Error editing expenses:' + error);
+    }
+  }
+
+  async addExpense(expense: Expense): Promise<ExpensesEditResponse> {
+    try {
+      const response = await apiClient.post<ExpensesEditResponse>(
+        `/api/Expenses`,
+        expense,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      return Promise.reject('Error adding expenses:' + error);
     }
   }
 

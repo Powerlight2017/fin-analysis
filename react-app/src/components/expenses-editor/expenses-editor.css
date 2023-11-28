@@ -4,6 +4,10 @@
   border: 1px solid #ccc;
 }
 
-.expenses-table button {
+.button.button-back {
   margin-right: 10px;
+}
+
+button.add-expense-button {
+  margin: 10px;
 }

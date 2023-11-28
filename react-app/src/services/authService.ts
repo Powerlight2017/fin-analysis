@@ -26,7 +26,7 @@ class AuthService {
         apiClient.defaults.headers['Authorization'] =
           'Bearer ' + response.data.token;
 
-        return Promise.resolve('');
+        return Promise.resolve(response.data.token);
       } else {
         return Promise.reject('Invalid username or password');
       }

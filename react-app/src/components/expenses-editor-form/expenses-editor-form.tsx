@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { formatDate } from '../../services/utils';
 import './expenses-editor-form.css';
-
-interface Expense {
-  sum: number;
-  description: string;
-  date: Date;
-  id: number;
-}
+import { ExpenseStateDto } from '../../redux/features/expenses/expensesSlice';
 
 interface ExpenseFormProps {
-  initialData?: Expense;
-  onSubmit: (data: Expense) => void;
+  initialData?: ExpenseStateDto;
+  onSubmit: (data: ExpenseStateDto) => void;
   handleBack: () => void;
 }
 
@@ -23,42 +16,37 @@ const ExpenseEditorForm: React.FC<ExpenseFormProps> = ({
 }) => {
   const {
     handleSubmit,
+    trigger,
     control,
     formState: { errors },
     setValue,
-  } = useForm<Expense>({
+  } = useForm<ExpenseStateDto>({
     defaultValues: initialData,
   });
 
   const [dateStr, setDateStr] = useState<string>('');
 
+  const processBack = () => {
+    trigger(); // reset form errors.
+    handleBack(); // do back.
+  };
+
   if (initialData && initialData.date && dateStr === '') {
-    setDateStr(formatDate(initialData.date));
+    setDateStr(initialData.date);
   }
 
-  const onSubmitHandler = (data: Expense) => {
-    const modifiedData = { ...data, date: new Date(dateStr) };
+  const onSubmitHandler = (data: ExpenseStateDto) => {
+    const modifiedData = { ...data, date: dateStr };
     onSubmit(modifiedData);
   };
 
   const changeDate = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setDateStr(e.target.value);
-    setValue('date', new Date(e.target.value));
+    setValue('date', e.target.value);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmitHandler)}>
-      <div className="form-group">
-        <label>Sum:</label>
-        <Controller
-          name="sum"
-          control={control}
-          rules={{ required: 'This field is required' }}
-          render={({ field }) => <input {...field} type="number" />}
-        />
-        {errors.sum && <p>{errors.sum.message}</p>}
-      </div>
-
       <div className="form-group">
         <label>Description:</label>
         <Controller
@@ -70,7 +58,18 @@ const ExpenseEditorForm: React.FC<ExpenseFormProps> = ({
         {errors.description && <p>{errors.description.message}</p>}
       </div>
 
-      <div className="form-group">
+      <div className="form-group limited-length-field">
+        <label>Sum:</label>
+        <Controller
+          name="sum"
+          control={control}
+          rules={{ required: 'This field is required' }}
+          render={({ field }) => <input {...field} type="number" />}
+        />
+        {errors.sum && <p>{errors.sum.message}</p>}
+      </div>
+
+      <div className="form-group limited-length-field">
         <label>Date:</label>
         <Controller
           name="date"
@@ -93,8 +92,10 @@ const ExpenseEditorForm: React.FC<ExpenseFormProps> = ({
         <span>{initialData?.id}</span>
       </div>
 
-      <button type="submit">Save</button>
-      <button onClick={() => handleBack}>Back</button>
+      <button className="btn-submit" type="submit">
+        Save
+      </button>
+      <button onClick={processBack}>Back</button>
     </form>
   );
 };
