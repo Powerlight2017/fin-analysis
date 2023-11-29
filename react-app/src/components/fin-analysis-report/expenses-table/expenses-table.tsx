@@ -152,7 +152,6 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({
               ))}
             </div>
 
-            {displayedExpenses.length > itemsPerPage ? (
               <div className="pagination-area">
                 <button
                   onClick={handlePreviousClick}
@@ -168,9 +167,6 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({
                   Forward
                 </button>
               </div>
-            ) : (
-              ''
-            )}
           </>
         )}
       </>

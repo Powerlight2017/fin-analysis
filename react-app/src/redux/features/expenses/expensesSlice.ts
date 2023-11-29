@@ -114,7 +114,9 @@ export const expensesSlice = createSlice({
       .addCase(addExpense.fulfilled, (state, action) => {
         const newExpense = action.payload;
         state.expenses.push(expenseToStateDto(newExpense.data));
+        state.expenses = state.expenses.sort((x)=>new Date(x.date).getUTCDate());
         state.editorExpenses.push(expenseToStateDto(newExpense.data));
+        state.editorExpenses = state.editorExpenses.sort((x)=>new Date(x.date).getUTCDate());
       })
       .addCase(editExpense.fulfilled, (state, action) => {
         const updatedExpense = action.payload;
